@@ -94,6 +94,25 @@ td_send({'@type': 'checkAuthenticationCode', 'code': 'xxxx'})
 td_send({'@type': 'checkAuthenticationPassword', 'password': 'xxxxxxxx'})
 
 
+
+from time import gmtime, strftime
+users = {}
+
+
+while True:
+    event = td_receive()
+    if event:
+        #print(event)
+        #print('')
+        if event.get('@type') == "updateUserStatus":
+            if users.get(event.get('user_id')):
+                striz = strftime("%Y-%m-%d %H:%M:%S") +"| "+event.get('status').get('@type')+"| "+users.get(event.get('user_id')).get('first_name')
+                print(striz)
+            else:
+                td_send({'@type': 'getUser', 'user_id': event.get('user_id')})
+        elif event.get('@type') == "user":
+            users[event.get('id')] = event
+
 td_json_client_destroy(client)
 
 
