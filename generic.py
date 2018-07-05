@@ -1,11 +1,21 @@
 from ctypes import CDLL, c_void_p, c_char_p, c_double, c_int, c_longlong, CFUNCTYPE
+from ctypes.util import find_library
+import os
 
-#tdjson_path = find_library("libtdjson.so") or "tdjson.dll"
-#if tdjson_path is None:
-#    print('can\'t find tdjson library')
-#    quit()
-# tdjson = CDLL(tdjson_path)
-tdjson = CDLL("lib/libtdjson.so")
+
+import json
+
+if os.name == 'posix':
+	tdjson = CDLL("lib/libtdjson.so")
+else:
+    try:
+        tdjson = CDLL("lib/tdjson32.dll")
+    except:
+        CDLL("lib/zlibd1.dll")
+        tdjson = CDLL("lib/tdjson64.dll")
+
+    # tdjson = CDLL(tdjson_path)
+
 td_json_client_create = tdjson.td_json_client_create
 td_json_client_create.restype = c_void_p
 td_json_client_create.argtypes = []
@@ -43,3 +53,35 @@ fatal_error_callback_type = CFUNCTYPE(None, c_char_p)
 td_set_log_fatal_error_callback = tdjson.td_set_log_fatal_error_callback
 td_set_log_fatal_error_callback.restype = None
 td_set_log_fatal_error_callback.argtypes = [fatal_error_callback_type]
+
+
+def on_fatal_error_callback(error_message):
+    print('TDLib fatal error: ', error_message)
+
+
+td_set_log_verbosity_level(2)
+c_on_fatal_error_callback = fatal_error_callback_type(on_fatal_error_callback)
+td_set_log_fatal_error_callback(c_on_fatal_error_callback)
+
+
+def td_send(query):
+    query = json.dumps(query).encode('utf-8')
+    td_json_client_send(client, query)
+
+
+def td_receive():
+    result = td_json_client_receive(client, 1.0)
+    if result:
+        result = json.loads(result.decode('utf-8'))
+    return result
+
+
+def td_execute(query):
+    query = json.dumps(query).encode('utf-8')
+    result = td_json_client_execute(client, query)
+    if result:
+        result = json.loads(result.decode('utf-8'))
+    return result
+
+
+client = td_json_client_create()

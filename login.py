@@ -1,60 +1,40 @@
-import json
 import getpass
 
 from generic import *
 
-def on_fatal_error_callback(error_message):
-    print('TDLib fatal error: ', error_message)
 
-td_set_log_verbosity_level(2)
-c_on_fatal_error_callback = fatal_error_callback_type(on_fatal_error_callback)
-td_set_log_fatal_error_callback(c_on_fatal_error_callback)
-
-client = td_json_client_create()
-
-def td_send(query):
-    query = json.dumps(query).encode('utf-8')
-    td_json_client_send(client, query)
-
-def td_receive():
-    result = td_json_client_receive(client, 1.0)
-    if result:
-        result = json.loads(result.decode('utf-8'))
-    return result
-
-def td_execute(query):
-    query = json.dumps(query).encode('utf-8')
-    result = td_json_client_execute(client, query)
-    if result:
-        result = json.loads(result.decode('utf-8'))
-    return result
+def logout():
+    td_send({'@type': 'logOut'})
 
 
-td_send({'@type': 'setTdlibParameters',
-         'parameters': {'use_test_dc': False,
-                        'api_id':94575,
-                        'api_hash': 'a3406de8d171bb422bb6ddf3bbd800e2',
-                        'device_model': 'Desktop',
-                        'system_version': 'Unknown',
-                        'system_language_code': 'en',
-                        'database_directory': 'Database',
-                        'files_directory': 'Data'
-                        }
-         })
 
-td_send({'@type': 'checkDatabaseEncryptionKey', 'encryption_key': 'randomencryption'})
+print("Starting login sequence")
 
-td_send({'@type': 'getAuthorizationState', '@extra': 1.01234})
-
-
-# Login sequence
 while True:
     event = td_receive()
     if event:
         print(event)
         if event.get('@type') == 'updateAuthorizationState':
             authtype = event.get('authorization_state').get('@type')
-            if authtype == "authorizationStateWaitPhoneNumber":
+            if authtype == "authorizationStateWaitTdlibParameters":
+                td_send({'@type': 'setTdlibParameters',
+                     'parameters': {'use_test_dc': False,
+                                    'api_id':94575,
+                                    'api_hash': 'a3406de8d171bb422bb6ddf3bbd800e2',
+                                    'device_model': 'Desktop',
+                                    'system_version': 'Unknown',
+                                    'application_version': "0.0",
+                                    'system_language_code': 'en',
+                                    'database_directory': 'Database',
+                                    'files_directory': 'Files',
+                                    'use_file_database': True,
+                                    'use_chat_info_database': True,
+                                    'use_message_database': True,
+                                    }
+                     })
+            elif authtype == 'authorizationStateWaitEncryptionKey':
+                td_send({'@type': 'checkDatabaseEncryptionKey', 'encryption_key': 'randomencryption'})
+            elif authtype == "authorizationStateWaitPhoneNumber":
                 phone = input('Enter phone number:')
                 td_send({'@type': 'setAuthenticationPhoneNumber',
                          'phone_number': phone,
@@ -72,5 +52,4 @@ while True:
 
 # more awesome stuff here
 
-td_json_client_destroy(client)
-
+# td_json_client_destroy(client)
