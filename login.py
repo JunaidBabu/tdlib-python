@@ -37,7 +37,7 @@ while True:
             elif authtype == "authorizationStateWaitPhoneNumber":
                 phone = input('Enter phone number:')
                 td_send({'@type': 'setAuthenticationPhoneNumber',
-                         'phone_number': phone,
+                         'phone_number': str(phone),
                          'allow_flash_call': False,
                          'is_current_phone_number': False}
                         )

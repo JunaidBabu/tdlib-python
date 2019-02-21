@@ -12,6 +12,13 @@ Libraries `lib/libtdjson.so` , `lib/tdjson32.dll` and `lib/tdjson64.dll` were co
 https://github.com/tdlib/td
 
 
+For quick test
+==============
+
+`python -i main.py`
+
+
+
 To send message
 ---------------
 
