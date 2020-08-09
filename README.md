@@ -1,26 +1,28 @@
-tdlib-python
-============
+# tdlib-python
 
 Python wrapper for Telegram tdlib
 
 https://core.telegram.org/tdlib
 
 
-
-Libraries `lib/libtdjson.so` , `lib/tdjson32.dll` and `lib/tdjson64.dll` were compiled from the original td repository:
-
-https://github.com/tdlib/td
+Libraries `lib/libtdjson.so` , `lib/tdjson32.dll` and `lib/tdjson64.dll` were compiled from the original td repository: https://github.com/tdlib/td
 
 
-For quick test
-==============
-
-`python -i main.py`
+## Example
 
 
+```
+git clone https://github.com/JunaidBabu/tdlib-python.git
+cp local_settings_sample.py local_settings.py
+# update local_settings.py
+cd tdlib-python
+python3 echo.py
+```
 
-To send message
----------------
+
+## Other snippets
+
+### To send message
 
 ```
 td_send({'@type': 'sendMessage',
